@@ -1,17 +1,150 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>DocumentTaggingSummarization</title>
+    <title>Smart Document Tagging and Summarization Platform</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body>
-  <h1>DocumentTaggingSummarization</h1>
-    <%= yield %>
+    <nav class="navbar">
+      <div class="nav-container">
+        <%= link_to "Document AI Platform", root_path, class: "nav-brand" %>
+        
+        <div class="nav-links">
+          <% if user_signed_in? %>
+            <%= link_to "My Documents", documents_path, class: "nav-link" %>
+            <%= link_to "Upload New", new_document_path, class: "nav-link" %>
+            <span class="nav-divider">|</span>
+            <span class="nav-user">Hello, <%= current_user.email %></span>
+            <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "nav-link nav-logout" %>
+          <% else %>
+            <%= link_to "Sign In", new_user_session_path, class: "nav-link" %>
+            <%= link_to "Sign Up", new_user_registration_path, class: "nav-link" %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+      <% if notice %>
+        <div class="alert alert-success">
+          <%= notice %>
+        </div>
+      <% end %>
+      
+      <% if alert %>
+        <div class="alert alert-error">
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f8f9fa;
+        line-height: 1.6;
+      }
+      
+      .navbar {
+        background: #343a40;
+        color: white;
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .nav-brand {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+      }
+      
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      
+      .nav-link {
+        color: #adb5bd;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        transition: background 0.2s;
+      }
+      
+      .nav-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+      }
+      
+      .nav-logout {
+        color: #ffc107;
+      }
+      
+      .nav-user {
+        color: #adb5bd;
+        font-size: 0.9rem;
+      }
+      
+      .nav-divider {
+        color: #6c757d;
+      }
+      
+      .main-content {
+        min-height: calc(100vh - 80px);
+        padding: 20px 0;
+      }
+      
+      .alert {
+        max-width: 1200px;
+        margin: 0 auto 20px auto;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      
+      .alert-success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      
+      .alert-error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      
+      @media (max-width: 768px) {
+        .nav-container {
+          flex-direction: column;
+          gap: 15px;
+        }
+        
+        .nav-links {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+    </style>
   </body>
 </html>
