@@ -1,2 +1,91 @@
-<h1>Your Documents</h1>
-<%= link_to "Upload New Document", new_document_path %>
+<div class="container">
+  <div class="header">
+    <h1>Your Documents</h1>
+    <%= link_to "Upload New Document", new_document_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @documents.any? %>
+    <div class="documents-grid">
+      <% @documents.each do |document| %>
+        <div class="document-card">
+          <h3><%= link_to document.title, document_path(document) %></h3>
+          
+          <div class="document-meta">
+            <p><strong>Uploaded:</strong> <%= document.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+            
+            <% if document.file.attached? %>
+              <p><strong>File:</strong> <%= document.file.filename %></p>
+            <% end %>
+          </div>
+          
+          <div class="processing-status">
+            <div class="status-item">
+              <span class="label">Summary:</span>
+              <span class="status <%= document.summary? ? 'complete' : 'pending' %>">
+                <%= document.summary? ? '✓ Complete' : '⏳ Processing...' %>
+              </span>
+            </div>
+            
+            <div class="status-item">
+              <span class="label">Tags:</span>
+              <span class="status <%= document.tags? ? 'complete' : 'pending' %>">
+                <%= document.tags? ? '✓ Complete' : '⏳ Processing...' %>
+              </span>
+            </div>
+          </div>
+          
+          <% if document.tags.present? %>
+            <div class="tags">
+              <% document.tags_array.each do |tag| %>
+                <span class="tag"><%= tag %></span>
+              <% end %>
+            </div>
+          <% end %>
+          
+          <div class="actions">
+            <%= link_to "View Details", document_path(document), class: "btn btn-sm btn-outline" %>
+            <%= link_to "Re-summarize", summarize_document_path(document), method: :post, class: "btn btn-sm btn-secondary" %>
+            <%= link_to "Re-tag", tag_document_path(document), method: :post, class: "btn btn-sm btn-secondary" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <h3>No documents yet</h3>
+      <p>Upload your first document to get started with AI-powered summarization and tagging.</p>
+      <%= link_to "Upload Document", new_document_path, class: "btn btn-primary btn-large" %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .btn { padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; }
+  .btn-primary { background: #007bff; color: white; }
+  .btn-secondary { background: #6c757d; color: white; }
+  .btn-outline { border: 1px solid #ddd; color: #333; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-large { padding: 15px 30px; font-size: 16px; }
+  
+  .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+  .document-card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; background: white; }
+  .document-card h3 { margin: 0 0 15px 0; }
+  .document-card h3 a { text-decoration: none; color: #333; }
+  .document-meta p { margin: 5px 0; color: #666; font-size: 14px; }
+  
+  .processing-status { margin: 15px 0; }
+  .status-item { display: flex; justify-content: space-between; margin: 5px 0; }
+  .status.complete { color: #28a745; font-weight: bold; }
+  .status.pending { color: #ffc107; font-weight: bold; }
+  
+  .tags { margin: 15px 0; }
+  .tag { background: #e9ecef; padding: 3px 8px; border-radius: 3px; font-size: 12px; margin-right: 5px; }
+  
+  .actions { margin-top: 15px; }
+  .actions .btn { margin-right: 10px; margin-bottom: 5px; }
+  
+  .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+  .empty-state h3 { margin-bottom: 10px; }
+</style>

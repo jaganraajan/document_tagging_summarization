@@ -1,0 +1,272 @@
+<div class="container">
+  <div class="document-header">
+    <h1><%= @document.title %></h1>
+    <div class="document-actions">
+      <%= link_to "Back to Documents", documents_path, class: "btn btn-secondary" %>
+      <%= link_to "Re-summarize", summarize_document_path(@document), method: :post, class: "btn btn-outline" %>
+      <%= link_to "Re-tag", tag_document_path(@document), method: :post, class: "btn btn-outline" %>
+    </div>
+  </div>
+
+  <div class="document-meta">
+    <div class="meta-item">
+      <strong>Uploaded:</strong> <%= @document.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+    </div>
+    <% if @document.file.attached? %>
+      <div class="meta-item">
+        <strong>File:</strong> <%= @document.file.filename %> 
+        <span class="file-size">(<%= number_to_human_size(@document.file.byte_size) %>)</span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="document-content-grid">
+    <!-- Processing Status -->
+    <div class="section processing-status">
+      <h3>Processing Status</h3>
+      <div class="status-grid">
+        <div class="status-item">
+          <div class="status-icon <%= @document.summary? ? 'complete' : 'pending' %>">
+            <%= @document.summary? ? '✓' : '⏳' %>
+          </div>
+          <div class="status-details">
+            <h4>Summary</h4>
+            <p><%= @document.summary? ? 'Complete' : 'Processing...' %></p>
+          </div>
+        </div>
+        
+        <div class="status-item">
+          <div class="status-icon <%= @document.tags? ? 'complete' : 'pending' %>">
+            <%= @document.tags? ? '✓' : '⏳' %>
+          </div>
+          <div class="status-details">
+            <h4>Tags</h4>
+            <p><%= @document.tags? ? 'Complete' : 'Processing...' %></p>
+          </div>
+        </div>
+      </div>
+      
+      <% unless @document.processing_complete? %>
+        <div class="processing-note">
+          <p><strong>Note:</strong> Processing may take a few moments. Refresh the page to see updates.</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="section summary-section">
+      <h3>AI-Generated Summary</h3>
+      <% if @document.summary.present? %>
+        <div class="summary-content">
+          <p><%= @document.summary %></p>
+        </div>
+      <% else %>
+        <div class="placeholder">
+          <p>Summary is being generated... Please wait or refresh the page.</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Tags Section -->
+    <div class="section tags-section">
+      <h3>AI-Generated Tags</h3>
+      <% if @document.tags.present? %>
+        <div class="tags-container">
+          <% @document.tags_array.each do |tag| %>
+            <span class="tag"><%= tag %></span>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="placeholder">
+          <p>Tags are being generated... Please wait or refresh the page.</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Content Section -->
+    <div class="section content-section">
+      <h3>Document Content</h3>
+      <% if @document.content.present? %>
+        <div class="content-preview">
+          <pre><%= truncate(@document.content, length: 2000) %></pre>
+          <% if @document.content.length > 2000 %>
+            <p class="content-note"><em>Content truncated for display. Full content used for processing.</em></p>
+          <% end %>
+        </div>
+      <% elsif @document.file.attached? %>
+        <div class="file-info">
+          <p><strong>File attached:</strong> <%= @document.file.filename %></p>
+          <p>Text content will be extracted and processed automatically.</p>
+        </div>
+      <% else %>
+        <div class="placeholder">
+          <p>No content available.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+  }
+  
+  .document-actions { display: flex; gap: 10px; }
+  
+  .document-meta {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+  }
+  .meta-item { margin-bottom: 5px; }
+  .file-size { color: #666; font-size: 14px; }
+  
+  .document-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  .processing-status { grid-column: 1 / -1; }
+  .content-section { grid-column: 1 / -1; }
+  
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+  }
+  
+  .status-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .status-icon.complete {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .status-icon.pending {
+    background: #fff3cd;
+    color: #856404;
+  }
+  
+  .status-details h4 { margin: 0 0 5px 0; }
+  .status-details p { margin: 0; color: #666; }
+  
+  .processing-note {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e2e3e5;
+    border-radius: 4px;
+  }
+  
+  .summary-content p {
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .tags-container { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    background: #007bff;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+  }
+  
+  .content-preview pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  .content-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .placeholder {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .file-info {
+    padding: 15px;
+    background: #e9ecef;
+    border-radius: 4px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-secondary { background: #6c757d; color: white; }
+  .btn-outline { border: 1px solid #007bff; color: #007bff; background: white; }
+  .btn:hover { opacity: 0.9; }
+  
+  @media (max-width: 768px) {
+    .document-content-grid {
+      grid-template-columns: 1fr;
+    }
+    .processing-status,
+    .content-section {
+      grid-column: 1;
+    }
+    .document-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+  }
+</style>
